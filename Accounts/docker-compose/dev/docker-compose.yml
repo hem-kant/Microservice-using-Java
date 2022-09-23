@@ -1,0 +1,78 @@
+version: "3.8"
+
+services:
+
+  configserver:
+    image: hemkant/configserver:latest
+    mem_limit: 700m
+    ports:
+      - "8071:8071"
+    networks:
+     - hemkant
+    depends_on:
+      - zipkin
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+
+  accounts:
+    image: hemkant/accounts:latest
+    mem_limit: 700m
+    ports:
+      - "8080:8080"
+    networks:
+      - hemkant
+    depends_on:
+      - configserver
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 30s
+        max_attempts: 3
+        window: 120s
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_CONFIG_IMPORT: configserver:http://configserver:8071/
+
+  
+  loans:
+    image: hemkant/loans:latest
+    mem_limit: 700m
+    ports:
+      - "8090:8090"
+    networks:
+      - hemkant
+    depends_on:
+      - configserver
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 30s
+        max_attempts: 3
+        window: 120s
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_CONFIG_IMPORT: configserver:http://configserver:8071/
+
+    
+  cards:
+    image: hemkant/cards:latest
+    mem_limit: 700m
+    ports:
+      - "9000:9000"
+    networks:
+      - hemkant
+    depends_on:
+      - configserver
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 30s
+        max_attempts: 3
+        window: 120s
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_CONFIG_IMPORT: configserver:http://configserver:8071/
+
+
+networks:
+  hemkant:

@@ -1,0 +1,30 @@
+version: "3.8"
+
+services:
+
+  accounts:
+    image: hemkant/accounts:latest
+    mem_limit: 700m
+    ports:
+      - "8080:8080"
+    networks:
+      - hemkant-network
+    
+  loans:
+    image: hemkant/loans:latest
+    mem_limit: 700m
+    ports:
+      - "8090:8090"
+    networks:
+      - hemkant-network
+    
+  cards:
+    image: hemkant/cards:latest
+    mem_limit: 700m
+    ports:
+      - "9090:9090"
+    networks:
+      - hemkant-network
+    
+networks:
+  hemkant-network:
