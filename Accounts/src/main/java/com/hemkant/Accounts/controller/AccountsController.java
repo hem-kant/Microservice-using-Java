@@ -1,5 +1,6 @@
 package com.hemkant.Accounts.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -9,13 +10,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.hemkant.Accounts.config.AccountsServiceConfig;
 import com.hemkant.Accounts.model.Accounts;
+import com.hemkant.Accounts.model.Cards;
 import com.hemkant.Accounts.model.Customer;
+import com.hemkant.Accounts.model.CustomerDetails;
+import com.hemkant.Accounts.model.Loans;
 import com.hemkant.Accounts.model.Properties;
 import com.hemkant.Accounts.repository.AccountsRepository;
- 
- 
+import com.hemkant.Accounts.service.client.CardsFeignClient;
+import com.hemkant.Accounts.service.client.LoansFeignClient;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.List; 
 
 /**
  * @author Hem Kant
@@ -30,6 +34,12 @@ public class AccountsController {
 	
 	@Autowired
 	AccountsServiceConfig accountsConfig;
+	
+	@Autowired
+	LoansFeignClient loansFeignClient;
+
+	@Autowired
+	CardsFeignClient cardsFeignClient;
 	
 	@PostMapping("/myAccount")
 	public Accounts getAccountDetails(@RequestBody Customer customer) {
@@ -51,5 +61,21 @@ public class AccountsController {
 				 accountsConfig.getBuildVersion(),accountsConfig.getMailDetails(),accountsConfig.getActiveBranches());
 				 	String jsonStr = ow.writeValueAsString(properties);
 				 	return jsonStr;
+	}
+	
+	@PostMapping("/myCustomerDetails")  
+	public CustomerDetails myCustomerDetails(@RequestBody Customer customer) {
+	 
+		Accounts accounts = accountsRepository.findByCustomerId(customer.getCustomerId());
+		List<Loans> loans = loansFeignClient.getLoansDetails(customer);
+		//List<Cards> cards = cardsFeignClient.getCardDetails(customer);
+
+		CustomerDetails customerDetails = new CustomerDetails();
+		customerDetails.setAccounts(accounts);
+		customerDetails.setLoans(loans);
+		//customerDetails.setCards(cards);
+		 
+		return customerDetails;
+
 	}
 }
